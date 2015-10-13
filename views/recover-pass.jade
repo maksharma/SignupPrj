@@ -1,0 +1,14 @@
+html 
+  head
+    title Password Recovery
+
+    body
+      p Password recovery
+        form(method = 'post' action ='/user/recoverpass' )  
+          Please Enter your Email :   
+          input(type='text', name='email', placeholder='abc@xyz.com')
+          br
+          input(type='submit' name = 'submit' value ='Recover now')
+          br
+          If If you are a new user, please signup.
+          a(href='/user/signup') Sign up
