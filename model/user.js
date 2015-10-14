@@ -141,8 +141,53 @@ var user ={
   },
 
   updatepassword : function(email, pass, cb){
-  
     var status = 1;
+    var ops={
+      value : {
+        password : pass
+      },
+      filters :
+      {
+        email : email
+      }
+    };
+    var query;
+    var fields = [];
+    
+    var filter1 =ops.filters;
+    var filter2 = [];
+    Object.keys(filter1).forEach(function(t) {
+      if (filter1[t]) {
+        if (util.isArray(filter1[t])) {
+          filter2.push(usertable[t].in(filter1[t]));
+        } else {
+          filter2.push(usertable[t].equals(filter1[t]));
+        }
+      }
+    });
+
+    query = usertable.update(ops.value);
+    
+    if (filter2.length) {
+      query = query.where.apply(query, filter2);
+    }
+    query.exec(function cb1(err, data){
+      if(!err && (data.affectedRows > 0))
+      {
+        status = 0;
+        return cb(err, status);
+      }
+      else{
+        status = 1;
+        console.log(err);
+        return cb(err, status);
+      }
+    });
+
+
+
+    /*====================================
+    //Old code for reference
     var query = usertable.update({
       password : pass
     }).where({
@@ -160,6 +205,7 @@ var user ={
         return cb(err, status);
       }
     });
+    ========================================*/
   },
 
   sendMail : function(email, name, message, cb){
