@@ -90,12 +90,15 @@ var users = {
     var email = req.body.email;
     var username = '';
     var message = '';
+    var ops = {
+      'email' : email
+    }
     
     if(email =='' || email == null){
       res.render('message',{message : 'You didn\'t enter any email. Try again'});
     }
     else{
-      user.getname(email, function cb1(err, status, name){
+      user.getname(email, ops, function cb1(err, status, name){
         if(err)
           console.log('error',err);
         else
