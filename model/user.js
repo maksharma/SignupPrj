@@ -63,9 +63,62 @@ var user ={
     });
   },
 
-  checkAndSignup : function(name, password, email, cb){
+  checkAndSignup : function(name, password, email, ops, cb){
     var status = 1;
 
+    var filter = ops.filters;
+    var filterArr = [];
+    Object.keys(filter).forEach(function(t) {
+      if (filter[t]) {
+        if (util.isArray(filter[t])) {
+          filterArr.push(usertable[t].in(filter[t]));
+        } else {
+          filterArr.push(usertable[t].equals(filter[t]));
+        }
+      }
+    });
+
+    var selected = ops.select;
+    var selectedFields = [];
+
+    Object.keys(selected).forEach(function(t) {
+      if (selected[t]) {
+        if (util.isArray(selected[t])) {
+          selectedFields.push(usertable[t].in(selected[t]));
+        } else {
+          selectedFields.push(usertable[t].equals(selected[t]));
+        }
+      }
+    });
+
+
+    var existingEmailCheckQuery = usertable.select(selectedFields).from(usertable);
+    var signupQuery = usertable.insert(ops.values);
+
+    if (filterArr.length) {
+      existingEmailCheckQuery = existingEmailCheckQuery.where.apply(existingEmailCheckQuery, filterArr);
+    }
+    console.log('signupquery : ', signupQuery.toQuery());
+
+    existingEmailCheckQuery.exec(function cb1(err, data){
+      if(err || data.length>0){
+        // console.log('GOT IT : ', data);
+        status = 1;
+        return cb(null, status);
+      }
+      else{
+        signupQuery.exec(function cb2(err, data){
+          if(!err && (data.affectedRows > 0))
+            {
+              status = 0;
+            }
+            return cb(err, status);
+        });
+      }
+    });
+
+    /*======================================
+    //old query for reference
     var signupquery = usertable.insert({
       name : name,
       password : password,
@@ -88,7 +141,7 @@ var user ={
             return cb(err, status);
         });
       }
-    }); 
+    }); */
   },
 
   getname : function(email, ops, cb){
@@ -140,17 +193,8 @@ var user ={
     });
   },
 
-  updatepassword : function(email, pass, cb){
+  updatepassword : function(email, pass, ops, cb){
     var status = 1;
-    var ops={
-      value : {
-        password : pass
-      },
-      filters :
-      {
-        email : email
-      }
-    };
     var query;
     var fields = [];
     
@@ -165,7 +209,6 @@ var user ={
         }
       }
     });
-
     query = usertable.update(ops.value);
     
     if (filter2.length) {

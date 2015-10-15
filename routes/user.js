@@ -67,12 +67,25 @@ var users = {
     var name = req.body.username;
     var password = req.body.hashpwd;
     var email = req.body.email;
+    var ops = {
+      values : {
+        name : name,
+        password : password,
+        email : email
+      },
+      select : {
+        email : email
+      },
+      filters : {
+        email : email
+      }
+    }
     
     if(name=='' || name==null  || password =='' || password==null || email=='' || email==null){
       res.render('signup', {message: 'Wrong data try again :'});
     }
     else{
-      user.checkAndSignup(name, password, email, function cb(err, status){
+      user.checkAndSignup(name, password, email, ops, function cb(err, status){
         if(!err){
           status ==0? res.render('message', {message : 'Signup successful. Login now!'}) : res.render('message', {message : 'Duplicate details.'});
         }
@@ -135,10 +148,19 @@ var users = {
   updatepassword : function(req, res, next){
     var email = req.body.email;
     var password = req.body.hashpwd;
+    var ops={
+      value : {
+        password : password
+      },
+      filters :
+      {
+        email : email
+      }
+    };
     if(email == '' || email == null || password == '' || password == null)
       res.render('message', {message : 'Please enter your email and new password.'});
     else{
-      user.updatepassword(email, password, function cb(err, status){
+      user.updatepassword(email, password, ops, function cb(err, status){
         status==0? res.render('message', {message: 'Password successfully changed.'}) : res.render('message',{message : 'Error in details! Email doesn\'t exist in records.'});
      });
     }
